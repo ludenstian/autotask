@@ -10,14 +10,38 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:automatask.helloWorld"
+    "onCommand:automatask.run"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "automatask.helloWorld",
-        "title": "Hello World"
+        "command": "automatask.run",
+        "title": "Automatically run tasks"
+      }
+    ],
+    "taskDefinitions": [
+      {
+        "type": "automatask",
+        "required": ["filetype"],
+        "properties": {
+          "filetype": {
+            "type": "string",
+            "description": "Specify filetype which this task will run automatically"
+          },
+          "validate": {
+            "type": "string",
+            "description": "Specify command which will be triggered by this task"
+          },
+          "expected": {
+            "type": "string",
+            "description": "The expected result after running command, if they are equal, this task will run the ${trigger} task"
+          },
+          "trigger" : {
+            "type": "string",
+            "description": "The task which is triggered by this task when all conditions are met"
+          }
+        }
       }
     ]
   },
