@@ -70,16 +70,20 @@ export class AutomataskCommand {
         let result: vscode.Task[] = [];
         tasks.forEach(task => {
             const taskInfo: AutomataskDefinition = <any>task.definition;
+            if (taskInfo.require === undefined || taskInfo.require.length === 0) {
+                result.push(task);
+                return;
+            }
             for (const requirement of taskInfo.require!) {
                 try {
                     let buffer = cp.execSync(requirement.scriptToCheck);
                     if (buffer.toString("utf-8").trim() !== requirement.expectedValue) {
-                        return [];
+                        return;
                     }
                     result.push(task);
                 }
                 catch (e) {
-                    return [];
+                    return;
                 }
             }
         });
