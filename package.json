@@ -9,7 +9,7 @@
     "url": "https://github.com/nhathuy13598/automatask"
   },
   "engines": {
-    "vscode": "^1.71.0"
+    "vscode": "^1.67.2"
   },
   "categories": [
     "Other"
