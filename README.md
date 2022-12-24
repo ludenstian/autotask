@@ -1,33 +1,38 @@
+<img align="left" width="70" height="70" src="https://github.com/nhathuy13598/automatask/blob/ISSUE-1/public/icon.jpg">
+
 # automatask
 
 This extension aims to automatically trigger suitable task when some conditions are met.
 
-Usage example:
+*Problem*: You have to choose the right task before executing it with the current file.
+![Before](https://github.com/nhathuy13598/automatask/blob/ISSUE-1/doc/Before.gif)
+
+*Solution*: With this extension, you can create a task call `automatask` to automatically choose the right task to run for specific file.
+![After](https://github.com/nhathuy13598/automatask/blob/ISSUE-1/doc/After.gif)
+
+*Usage example*:
 ```
 {
     "version": "2.0.0",
     "tasks": [
         {
             "type": "shell",
-            "label": "Run me",
-            "command": ["whoami"]
+            "label": "Validate script",
+            "command": [
+                "python ${workspaceFolder}/test_case.py"
+            ],
+            "problemMatcher": []
         },
         {
             "type": "automatask",
             "filetype": ".txt",
-            "validate": "echo cyberpunk",
-            "expected": "cyberpunk",
-            "trigger": "Run me",
-            "label": "Condition"
+            "filename": "*",
+            "taskToTrigger": "Validate script",
+            "label": "First example"
         }
     ]
 }
 ```
-Press `Ctrl + Shift + P` and then run command `Automatically run tasks`. It will check the `filetype` then execute command `validate` and check result with `expected`. If all conditions are met, the task which has label `Run me` will be triggered.
-
-## Release Notes
-
-### 0.0.1
-This is alpha version
+Press `F6` and this extension will find the suitable task to run.
 
 **Enjoy!**
