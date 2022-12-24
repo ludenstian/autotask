@@ -1,0 +1,20 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "Validate script",
+            "command": [
+                "python ${workspaceFolder}/test_case.py"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "type": "automatask",
+            "filetype": ".txt",
+            "filename": "*",
+            "taskToTrigger": "Validate script",
+            "label": "First example"
+        }
+    ]
+}

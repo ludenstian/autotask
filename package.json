@@ -3,8 +3,8 @@
   "displayName": "Automatask",
   "description": "Automatically run suitable tasks without waisting time",
   "icon": "public/icon.jpg",
-  "publisher": "cyberpunkdev2077",
-  "version": "0.0.1",
+  "publisher": "ludenstian",
+  "version": "1.0.0",
   "repository": {
     "url": "https://github.com/nhathuy13598/automatask"
   },
@@ -13,6 +13,12 @@
   },
   "categories": [
     "Other"
+  ],
+  "keywords": [
+    "tasks",
+    "automatic",
+    "execute",
+    "script"
   ],
   "activationEvents": [
     "onCommand:automatask.run"
@@ -94,7 +100,7 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@types/vscode": "^1.71.0",
+    "@types/vscode": "^1.67.2",
     "@types/glob": "^7.2.0",
     "@types/mocha": "^9.1.1",
     "@types/node": "16.x",
