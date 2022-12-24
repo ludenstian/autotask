@@ -5,10 +5,10 @@
 This extension aims to automatically trigger suitable task when some conditions are met.
 
 *Problem*: You have to choose the right task before executing it with the current file.
-![Before](https://github.com/nhathuy13598/automatask/blob/main/doc/Before.gif)
+![Before](https://github.com/nhathuy13598/automatask/blob/main/public/Before.gif)
 
 *Solution*: With this extension, you can create a task call `automatask` to automatically choose the right task to run for specific file.
-![After](https://github.com/nhathuy13598/automatask/blob/main/doc/After.gif)
+![After](https://github.com/nhathuy13598/automatask/blob/main/public/After.gif)
 
 *Usage example*:
 ```
