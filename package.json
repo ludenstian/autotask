@@ -93,6 +93,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
+    "deploy": "vsce publish"
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
