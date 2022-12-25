@@ -4,7 +4,7 @@
   "description": "Automatically run suitable tasks without waisting time",
   "icon": "public/icon.jpg",
   "publisher": "ludenstian",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "repository": {
     "url": "https://github.com/nhathuy13598/automatask"
   },
@@ -37,24 +37,33 @@
     "taskDefinitions": [
       {
         "type": "automatask",
-        "required": ["taskToTrigger", "label", "filename", "filetype"],
+        "required": [
+          "taskToTrigger",
+          "label",
+          "filename",
+          "filetype"
+        ],
         "properties": {
           "filetype": {
             "type": "string",
             "description": "Specify filetype which this task will run automatically, if * is specified, apply to all file extension",
-            "examples": [".txt"],
+            "examples": [
+              ".txt"
+            ],
             "default": "*"
           },
           "filename": {
             "type": "string",
             "description": "Specify a regex pattern to match full filename which this task will run automatically",
-            "examples": ["example.txt"],
+            "examples": [
+              "example.txt"
+            ],
             "default": "*"
           },
           "require": {
             "type": "array",
             "items": {
-              "type":"object",
+              "type": "object",
               "properties": {
                 "name": {
                   "type": "string",
@@ -69,14 +78,20 @@
                   "description": "The expected value that ${scriptToCheck} needs to return"
                 }
               },
-              "required": ["scriptToCheck", "expectedValue" , "name"]
+              "required": [
+                "scriptToCheck",
+                "expectedValue",
+                "name"
+              ]
             },
             "description": "List of requirements that needed to automatically trigger task ${taskToTrigger}"
           },
-          "taskToTrigger" : {
+          "taskToTrigger": {
             "type": "string",
             "description": "The task which is triggered by this task when all conditions are met",
-            "examples": ["Label of task which you want to run"]
+            "examples": [
+              "Label of task which you want to run"
+            ]
           }
         }
       }
