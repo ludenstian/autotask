@@ -47,7 +47,7 @@
           },
           "filename": {
             "type": "string",
-            "description": "Specify full filename which this task will run automatically, if * is specified, apply to all filename",
+            "description": "Specify a regex pattern to match full filename which this task will run automatically",
             "examples": ["example.txt"],
             "default": "*"
           },
@@ -93,7 +93,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "deploy": "vsce publish"
+    "deploy": "vsce publish",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
