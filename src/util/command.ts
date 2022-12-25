@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as cp from 'child_process';
 import { AutomataskDefinition, Requirement } from './provider';
+import { isRegExp } from 'util/types';
 
 export class AutomataskCommand {
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -42,22 +43,13 @@ export class AutomataskCommand {
             if (taskInfo.type !== "automatask") {
                 return;
             }
-            if (taskInfo.filetype === "*" && taskInfo.filename === "*") {
-                result.push(task);
+            let currentFilename = path.basename(vscode.window.activeTextEditor!.document.fileName);
+            let regexPattern = RegExp(taskInfo.filename);
+            if (!regexPattern.test(currentFilename)) {
                 return;
             }
-            let currentFilename = path.basename(vscode.window.activeTextEditor!.document.fileName);
-            if (taskInfo.filetype === "*") { // Now, taskInfo.filename !== "*"
-                if (currentFilename === taskInfo.filename) {
-                    result.push(task);
-                }
-            }
-            else {
-                if (currentFilename.endsWith(taskInfo.filetype)) {
-                    if (taskInfo.filename === "*" || currentFilename === taskInfo.filename) {
-                        result.push(task);
-                    }
-                }
+            if (taskInfo.filetype === "*" || currentFilename.endsWith(taskInfo.filetype)) {
+                result.push(task);
             }
         });
         if (result.length === 0) {
