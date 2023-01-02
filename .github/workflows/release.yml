@@ -1,13 +1,12 @@
 name: Release
 on:
-  push:
-    branches:
-    - release
   release:
     types:
     - created
+    branches:
+    - release
 jobs:
-  Build_merge_request:
+  Publish_extension:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 
@@ -16,6 +15,8 @@ jobs:
         uses: actions/setup-node@v3.5.1
       - name: Install dependencies
         run: npm install
+      - name: Install vsce
+        run: npm install -g @vscode/vsce
       - name: Publish
         run: npm run deploy
         env:
