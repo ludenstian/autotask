@@ -1,9 +1,11 @@
 name: Release
 on:
+  push:
+    branches:
+    - release
   release:
     types:
     - created
-    braches: release
 jobs:
   Build_merge_request:
     runs-on: ubuntu-latest
