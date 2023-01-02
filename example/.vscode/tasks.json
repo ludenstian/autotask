@@ -10,11 +10,26 @@
             "problemMatcher": []
         },
         {
+            "type": "shell",
+            "label": "Validate script 2",
+            "command": [
+                "python ${workspaceFolder}/test_case_2.py"
+            ],
+            "problemMatcher": []
+        },
+        {
             "type": "automatask",
-            "filetype": ".txt",
-            "filename": "*",
+            "filetype": "${fileExtname}",
+            "filename": ".*",
             "taskToTrigger": "Validate script",
             "label": "First example"
+        },
+        {
+            "type": "automatask",
+            "filetype": ".txt",
+            "filename": "example.txt",
+            "taskToTrigger": "Validate script 2",
+            "label": "Second example"
         }
     ]
 }
