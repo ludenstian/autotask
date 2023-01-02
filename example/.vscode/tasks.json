@@ -21,15 +21,8 @@
             "type": "automatask",
             "filetype": "${fileExtname}",
             "filename": ".*",
-            "taskToTrigger": "Validate script",
+            "taskToTrigger": ["Validate script", "Validate script 2"],
             "label": "First example"
-        },
-        {
-            "type": "automatask",
-            "filetype": ".txt",
-            "filename": "example.txt",
-            "taskToTrigger": "Validate script 2",
-            "label": "Second example"
         }
     ]
 }

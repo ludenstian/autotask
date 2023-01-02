@@ -88,11 +88,12 @@
             "description": "List of requirements that needed to automatically trigger task ${taskToTrigger}"
           },
           "taskToTrigger": {
-            "type": "string",
-            "description": "The task which is triggered by this task when all conditions are met",
-            "examples": [
-              "Label of task which you want to run"
-            ]
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true,
+            "description": "List of candidate tasks which will be triggered"
           }
         }
       }

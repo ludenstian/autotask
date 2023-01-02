@@ -11,7 +11,7 @@ export interface Requirement {
 export interface AutomataskDefinition extends vscode.TaskDefinition {
     filetype: string;
     filename: string;
-    taskToTrigger: string;
+    taskToTrigger: Array<string>;
     require?: Array<Requirement>;
 }
 
@@ -134,7 +134,7 @@ class AutomataskTerminal implements vscode.Pseudoterminal {
             if (task.definition.type === AutomataskProvider.AUTOMATASK_TYPE) {
                 continue;
             }
-            if (this.taskDefinition.taskToTrigger !== task.name) {
+            if (this.taskDefinition.taskToTrigger.indexOf(task.name) === -1) {
                 continue;
             }
             result.push(task);
