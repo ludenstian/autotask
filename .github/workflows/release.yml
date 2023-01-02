@@ -1,0 +1,20 @@
+name: Release
+on:
+  release:
+    types:
+    - created
+    braches: release
+jobs:
+  Build_merge_request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v3.2.0
+      - name: Install node
+        uses: actions/setup-node@v3.5.1
+      - name: Install dependencies
+        run: npm install
+      - name: Publish
+        run: npm run deploy
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
