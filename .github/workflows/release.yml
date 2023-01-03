@@ -19,4 +19,6 @@ jobs:
       - name: Install vsce
         run: npm install -g @vscode/vsce
       - name: Publish
-        run: vsce publish --pat ${{ secrets.VSCE_PAT }}
+        env:
+          PAT: ${{ secrets.VSCE_PAT }}
+        run: vsce publish --pat "$PAT"
