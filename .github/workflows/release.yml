@@ -22,7 +22,7 @@ jobs:
         run: npm install -g @vscode/vsce
       - name: Publish
         env:
-          PAT: ${{ secrets.VSCE_PAT }}
+          PAT: ${{ secrets.TEST }}
         run: |
           echo "Hello world $Greeting"
           echo "$PAT"
