@@ -9,6 +9,8 @@ on:
 jobs:
   Publish_extension:
     runs-on: ubuntu-latest
+    env:
+      Greeting: Hello
     steps:
       - name: Checkout 
         uses: actions/checkout@v3.2.0
@@ -22,5 +24,6 @@ jobs:
         env:
           PAT: ${{ secrets.VSCE_PAT }}
         run: |
-          echo $PAT
+          echo "Hello world $Greeting"
+          echo "$PAT"
           vsce publish --pat "$PAT"
