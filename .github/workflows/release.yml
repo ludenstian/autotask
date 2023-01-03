@@ -18,6 +18,8 @@ jobs:
         run: npm install
       - name: Install vsce
         run: npm install -g @vscode/vsce
+      - name: Login with vsce
+        run: vsce login ${{ secrets.VSCE_PAT }}
       - name: Publish
         run: npm run deploy
         env:
