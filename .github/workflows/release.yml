@@ -17,10 +17,12 @@ jobs:
         run: npm install -g @vscode/vsce
       - name: Package
         run: vsce package
-      - name: Publish
-        env:
-          PAT: ${{ secrets.VSCE_PAT }}
-        run: vsce publish --pat "$PAT"
+      # - name: Publish
+      #   env:
+      #     PAT: ${{ secrets.VSCE_PAT }}
+      #   run: vsce publish --pat "$PAT"
+      - name: Package location
+        run: ls -al
       - name: Upload files to a GitHub release
         uses: svenstaro/upload-release-action@2.3.0
         with:
