@@ -1,8 +1,8 @@
 {
   "name": "automatask",
   "displayName": "Automatask",
-  "description": "Automatically run suitable tasks without waisting time",
-  "icon": "public/icon.jpg",
+  "description": "Automatically run appropriate tasks based one filetype, filename or user's requirements in Visual Studio Code",
+  "icon": "public/logo.png",
   "publisher": "ludenstian",
   "version": "3.0.5",
   "repository": {
