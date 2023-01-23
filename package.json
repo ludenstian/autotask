@@ -4,7 +4,7 @@
   "description": "Automatically run appropriate tasks based one filetype, filename or user's requirements in Visual Studio Code",
   "icon": "public/logo.png",
   "publisher": "ludenstian",
-  "version": "3.1.5",
+  "version": "3.1.6",
   "repository": {
     "url": "https://github.com/nhathuy13598/automatask"
   },

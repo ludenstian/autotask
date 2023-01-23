@@ -3,26 +3,33 @@
     "tasks": [
         {
             "type": "shell",
-            "label": "Validate script",
+            "label": "Install prod package",
             "command": [
-                "python ${workspaceFolder}/test_case.py"
+                "npm", "install", "${input:package_name}"
             ],
             "problemMatcher": []
         },
         {
             "type": "shell",
-            "label": "Validate script 2",
+            "label": "Install dev package",
             "command": [
-                "python ${workspaceFolder}/test_case_2.py"
+                "npm", "install", "${input:package_name}", "--save-dev"
             ],
             "problemMatcher": []
         },
         {
             "type": "automatask",
-            "filetype": "${fileExtname}",
+            "filetype": ".js",
             "filename": ".*",
-            "taskToTrigger": ["Validate script", "Validate script 2"],
-            "label": "First example"
+            "taskToTrigger": ["Install prod package", "Install dev package"],
+            "label": "Install package"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "package_name",
+            "type": "promptString",
+            "description": "Package name to install"
         }
     ]
 }
