@@ -45,8 +45,7 @@ Now, you can create a task called `automatask` to automatically choose the appro
 ```
 {
     "type": "automatask",
-    "filetype": ".js",
-    "filename": ".*",
+    "filePatterns": ["\\.js"],
     "taskToTrigger": ["Install prod package", "Install dev package"],
     "label": "Install package"
 }
@@ -78,8 +77,7 @@ You need to add a new task called `automatask` alongside with already existed ta
         },
         {
             "type": "automatask",
-            "filetype": ".js",
-            "filename": ".*",
+            "filePatterns": ["\\.js"],
             "taskToTrigger": ["Install prod package", "Install dev package"],
             "label": "Install package"
         }

@@ -4,7 +4,7 @@
   "description": "Automatically run appropriate tasks based one filetype, filename or user's requirements in Visual Studio Code",
   "icon": "public/logo.png",
   "publisher": "ludenstian",
-  "version": "3.1.6",
+  "version": "4.0.0",
   "repository": {
     "url": "https://github.com/nhathuy13598/automatask"
   },
@@ -41,25 +41,17 @@
         "required": [
           "taskToTrigger",
           "label",
-          "filename",
-          "filetype"
+          "filePatterns"
         ],
         "properties": {
-          "filetype": {
-            "type": "string",
-            "description": "Specify filetype which this task will run automatically, if * is specified, apply to all file extension",
-            "examples": [
-              ".txt"
-            ],
-            "default": "*"
-          },
-          "filename": {
-            "type": "string",
-            "description": "Specify a regex pattern to match full filename which this task will run automatically",
-            "examples": [
-              "example.txt"
-            ],
-            "default": "*"
+          "filePatterns": {
+            "type": "array",
+            "items": {
+              "type":"string"
+            },
+            "uniqueItems": true,
+            "description": "Specify a list of filename patterns that this task will be triggered automatically",
+            "default": [".*"]
           },
           "require": {
             "type": "array",
@@ -70,22 +62,49 @@
                   "type": "string",
                   "description": "Name of requirement"
                 },
-                "scriptToCheck": {
+                "command": {
                   "type": "string",
-                  "description": "Specify script which will be triggered to check"
+                  "description": "Specify command which will be triggered"
                 },
                 "expectedValue": {
                   "type": "string",
-                  "description": "The expected value that ${scriptToCheck} needs to return"
+                  "description": "The expected value that ${command} needs to return"
+                },
+                "options": {
+                  "type": "object",
+                  "properties": {
+                    "cwd": {
+                      "type": "string",
+                      "description": "The current working directory of the executed program or script. If omitted Code's current workspace root is used."
+                    },
+                    "env": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      },
+                      "description": "The environment of the executed program or shell. If omitted the parent process environment is used."
+                    },
+                    "shell": {
+                      "type": "object",
+                      "properties": {
+                        "executable": {
+                          "type": "string",
+                          "description": "The shell to be used."
+                        }
+                      },
+                      "description": "Configures the shell to be used."
+                    }
+                  },
+                  "description": "Additional command options"
                 }
               },
               "required": [
-                "scriptToCheck",
+                "command",
                 "expectedValue",
                 "name"
               ]
             },
-            "description": "List of requirements that needed to automatically trigger task ${taskToTrigger}"
+            "description": "List of conditions that are required to trigger task ${taskToTrigger}"
           },
           "taskToTrigger": {
             "type": "array",

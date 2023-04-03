@@ -1,22 +1,33 @@
 import path = require('path');
 import * as cp from 'child_process';
 import * as vscode from 'vscode';
+import * as util from 'node:util';
+import { Status, executionManager } from './executionManager';
+import { taskManager } from './taskManager';
+import { EventEmitter } from 'node:events';
+const exec = util.promisify(cp.exec);
 
+export interface Shell {
+    executable?: string | undefined;
+}
+export interface CommandOptions {
+    cwd?: string | undefined;
+    env?: NodeJS.Dict<string>;
+    shell?: Shell | undefined;
+}
 export interface Requirement {
-    scriptToCheck: string;
+    command: string;
     expectedValue: string;
     name: string;
-    useTask: boolean;
+    options?: CommandOptions | undefined;
 }
 export interface AutomataskDefinition extends vscode.TaskDefinition {
-    filetype: string;
-    filename: string;
+    filePatterns: Array<string>;
     taskToTrigger: Array<string>;
     require?: Array<Requirement>;
 }
 
 export class AutomataskProvider implements vscode.TaskProvider {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     public static AUTOMATASK_TYPE = "automatask";
 
     public provideTasks(token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task[]> {
@@ -33,15 +44,16 @@ export class AutomataskProvider implements vscode.TaskProvider {
 }
 
 enum Character {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     ENDLINE = "\r\n",
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     TAB = "\t"
 };
+
 class AutomataskTerminal implements vscode.Pseudoterminal {
     private writeEmitter = new vscode.EventEmitter<string>();
     private closeEmitter = new vscode.EventEmitter<number>();
     private taskDefinition: AutomataskDefinition;
+    private taskExecution: vscode.TaskExecution | undefined;
+    private taskStatusEmitter: EventEmitter | undefined;
 
     onDidWrite: vscode.Event<string> = this.writeEmitter.event;
     onDidClose?: vscode.Event<number> = this.closeEmitter.event;
@@ -51,14 +63,22 @@ class AutomataskTerminal implements vscode.Pseudoterminal {
     }
 
     async open(initialDimensions: vscode.TerminalDimensions | undefined): Promise<void> {
-        this.writeEmitter.fire(`Running ${this.taskDefinition.name}${Character.ENDLINE}`);
-        if (!this.isAutomatasksRelateToFilenameOrExtension()) {
+        this.taskStatusEmitter = executionManager.GetEmitterFromManager();
+        if (this.taskStatusEmitter === undefined) { // Should never happen
+            vscode.window.showErrorMessage("Extension error. Please open issue at https://github.com/ludenstian/automatask/issues");
             this.closeEmitter.fire(1);
             return;
         }
-
-        if (!this.doesTaskMeetRequirements()) {
+        this.writeEmitter.fire(`Running ${this.taskDefinition.name}${Character.ENDLINE}`);
+        if (!this.doesMatchFilepatterns()) {
             this.closeEmitter.fire(1);
+            this.taskStatusEmitter.emit(Status.FAIL);
+            return;
+        }
+
+        if (! (await this.doesTaskMeetRequirements())) {
+            this.closeEmitter.fire(1);
+            this.taskStatusEmitter.emit(Status.FAIL);
             return;
         }
 
@@ -67,6 +87,7 @@ class AutomataskTerminal implements vscode.Pseudoterminal {
         if (tasksToRunNext.length === 0) {
             this.writeEmitter.fire(Character.TAB + "Cannot find any suitable tasks!" + Character.TAB);
             this.closeEmitter.fire(1);
+            this.taskStatusEmitter.emit(Status.FAIL);
             return;
         }
         if (tasksToRunNext.length > 1) {
@@ -78,57 +99,74 @@ class AutomataskTerminal implements vscode.Pseudoterminal {
                 await vscode.tasks.executeTask(task);
             }
             this.closeEmitter.fire(0);
+            this.taskStatusEmitter.emit(Status.SUCCESS);
             return;
         }
-        await vscode.tasks.executeTask(tasksToRunNext.at(0)!);
+        this.taskExecution = await vscode.tasks.executeTask(tasksToRunNext.at(0)!);
         this.closeEmitter.fire(0);
+        this.taskStatusEmitter.emit(Status.SUCCESS);
     }
-    close(): void { }
 
-    private isAutomatasksRelateToFilenameOrExtension(): boolean {
+    close(): void {
+        this.taskExecution?.terminate();
+    }
+
+    private doesMatchFilepatterns(): boolean {
         try {
-            let currentFilename = path.basename(vscode.window.activeTextEditor!.document.fileName);
-            let regexPattern = RegExp(this.taskDefinition.filename);
-            if (!regexPattern.test(currentFilename)) {
-                this.writeEmitter.fire(Character.TAB + `Cannot match current filename with pattern ${regexPattern.source}` + Character.ENDLINE);
-                return false;
-            }
-            if (this.taskDefinition.filetype !== "*" && !currentFilename.endsWith(this.taskDefinition.filetype)) {
-                this.writeEmitter.fire(Character.TAB + `Current file name doesn't endwith ${this.taskDefinition.filetype}` + Character.ENDLINE);
-                return false;
+            let currentFilename = vscode.window.activeTextEditor!.document.fileName;
+            for (const pattern of this.taskDefinition.filePatterns) {
+                let regexPattern = RegExp(pattern);
+                if (regexPattern.test(currentFilename)) {
+                    return true;
+                }
             }
         }
         catch (e) {
             this.writeEmitter.fire(Character.TAB + (e as Error).message + Character.ENDLINE);
             return false;
         }
-        return true;
+        return false;
     }
 
-    private doesTaskMeetRequirements(): boolean {
+    private async execRequirement(requirement: Requirement) : Promise<boolean> {
+        let command = requirement.command;
+        try {
+            const {stdout, stderr} = await exec(command, {
+                encoding: "utf-8",
+                cwd: requirement.options?.cwd,
+                shell: requirement.options?.shell?.executable,
+                env: requirement.options?.env
+            });
+            const trim_result = stdout.trim();
+            if (trim_result !== requirement.expectedValue) {
+                this.writeEmitter.fire(Character.TAB + `The result '${trim_result}' is not equal with '${requirement.expectedValue}'` + Character.ENDLINE);
+                return false;
+            }
+            return true;
+        }
+        catch (e) {
+            this.writeEmitter.fire(Character.TAB + `Can not run command: ${command}` + Character.ENDLINE);
+            return false;
+        }
+    }
+
+    private async doesTaskMeetRequirements(): Promise<boolean> {
         if (this.taskDefinition.require === undefined || this.taskDefinition.require.length === 0) {
             return true;
         }
+        let requirePromises: Promise<boolean>[] = [];
         for (const requirement of this.taskDefinition.require!) {
-            try {
-                let buffer = cp.execSync(requirement.scriptToCheck, {
-                    encoding: "utf-8"
-                });
-                if (buffer.trim() !== requirement.expectedValue) {
-                    this.writeEmitter.fire(Character.TAB + `The result '${buffer.trim()}' is not equal with '${requirement.expectedValue}'` + Character.ENDLINE);
-                    return false;
-                }
-            }
-            catch (e) {
-                this.writeEmitter.fire(Character.TAB + (e as Error).message + Character.ENDLINE);
-                return false;
-            }
+            requirePromises.push(this.execRequirement(requirement));
         }
-        return true;
+        let finalResult = await Promise.all(requirePromises).catch(reason => {
+            this.writeEmitter.fire(Character.TAB + `${reason}` + Character.ENDLINE);
+            return [false];
+        });
+        return finalResult.every(Boolean);
     }
 
     private async getTasksToTrigger(): Promise<vscode.Task[]> {
-        let tasks = await vscode.tasks.fetchTasks();
+        let tasks = taskManager.GetAllTaskExceptAutomatask();
         let result: vscode.Task[] = [];
         for (const task of tasks) {
             if (task.definition.type === AutomataskProvider.AUTOMATASK_TYPE) {
