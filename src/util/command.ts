@@ -1,16 +1,12 @@
-import * as vscode from 'vscode';
-import { AutomataskDefinition, AutomataskProvider, Requirement } from './provider';
+import { executionManager } from './executionManager';
+import { taskManager } from './taskManager';
 
 export class AutomataskCommand {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     public static AUTOMATASK_COMMAND = "automatask.run";
 
     public async run() {
-        let tasks: vscode.Task[] = await vscode.tasks.fetchTasks({
-            type: AutomataskProvider.AUTOMATASK_TYPE
-        });
-        for (const task of tasks) {
-            await vscode.tasks.executeTask(task);
-        }
+        await taskManager.FetchTask();
+        const tasks = taskManager.GetAutomatask();
+        executionManager.ExecuteAllTasks(tasks);
     }
 }
