@@ -64,7 +64,7 @@
             ],
             "require": [
                 {
-                    "command": "basename",
+                    "command": "basename ${file}",
                     "expectedValue": "example",
                     "name": "Get base name",
                     "options": {
