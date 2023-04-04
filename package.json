@@ -50,7 +50,7 @@
               "type":"string"
             },
             "uniqueItems": true,
-            "description": "Specify a list of filename patterns that this task will be triggered automatically",
+            "description": "Specify a list of filepaths in regex pattern that this task will be triggered automatically",
             "default": [".*"]
           },
           "require": {
@@ -68,7 +68,8 @@
                 },
                 "expectedValue": {
                   "type": "string",
-                  "description": "The expected value that ${command} needs to return"
+                  "description": "The expected value in regex pattern that ${command} needs to return",
+                  "default": ".*"
                 },
                 "options": {
                   "type": "object",
