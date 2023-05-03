@@ -1,0 +1,128 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "Test 1",
+            "command": [
+                "cat", "${file}"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "Test 1 copyy",
+            "command": [
+                "cat", "${file}"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "Test 2",
+            "command": [
+                "ls", "-a", "${file}"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "Test 3",
+            "command": [
+                "stat", "${file}"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "Test 4",
+            "command": [
+                "sleep", "20"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "Test 5",
+            "command": [
+                "node", "${file}"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "Test 6",
+            "command": [
+                "file", "${file}"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "type": "automatask",
+            "filePatterns": [
+                "\\.txt"
+            ],
+            "taskToTrigger": ["Test 1"],
+            "label": "Automatically test 1"
+        },
+        {
+            "type": "automatask",
+            "filePatterns": [
+                "\\.xml"
+            ],
+            "require": [
+                {
+                    "command": "basename ${file}",
+                    "expectedValue": "example",
+                    "name": "Get base name",
+                    "options": {
+                        "cwd": "${fileDirname}",
+                        "shell": {
+                            "executable": "/bin/bash",
+                            "args": []
+                        }
+                    }
+                },
+                {
+                    "command": "echo $ENV_TEST",
+                    "expectedValue": "ludenstian",
+                    "name": "Get env",
+                    "options": {
+                        "cwd": "${fileDirname}",
+                        "shell": {
+                            "executable": "/bin/bash"
+                        },
+                        "env": {
+                            "ENV_TEST": "ludenstian"
+                        }
+                    }
+                }
+            ],
+            "taskToTrigger": ["Test 2", "Test 3"],
+            "label": "Automatically test 2 + 3 copy"
+        },
+        {
+            "type": "automatask",
+            "filePatterns": [
+                "example.js"
+            ],
+            "require": [
+                {
+                    "command": "sleep 1000",
+                    "expectedValue": "nothing",
+                    "name": "Sleep forever",
+                }
+            ],
+            "taskToTrigger": ["Test 5"],
+            "label": "Automatically test 5"
+        },
+        {
+            "type": "automatask",
+            "filePatterns": [
+                "\\.js"
+            ],
+            "taskToTrigger": ["Test 6"],
+            "label": "Automatically test 6"
+        }
+    ]
+}

@@ -1,73 +1,61 @@
 import * as vscode from 'vscode';
-import {EventEmitter} from 'node:events';
-
-export enum Status {
-    SUCCESS="success",
-    FAIL="fail"
-};
-
-export type TaskStatusEmitter = vscode.EventEmitter<Status>;
+import { GlobalCacheMonitor } from './cacheMonitor';
+import { Deferred } from 'ts-deferred';
 
 class ExecutionManager {
-    private _isRunning: boolean;
-    private _taskStatusEmitter: EventEmitter;
-    private _runningExecutionList: Thenable<vscode.TaskExecution>[];
-    private _hasResolved: boolean;
-    private _rejectTask: number;
+    private isRunning_: boolean;
+    private taskDeferredPromiseMap_: Map<string, Deferred<vscode.TaskExecution>>;
+    private runningTaskExecution_: vscode.TaskExecution | undefined;
+    private downstreamTaskExecution_: vscode.TaskExecution | undefined;
 
     constructor() {
-        this._isRunning = false;
-        this._taskStatusEmitter = new EventEmitter();
-        this._runningExecutionList = [];
-        this._hasResolved = false;
-        this._rejectTask = 0;
+        this.isRunning_ = false;
+        this.taskDeferredPromiseMap_ = new Map<string, Deferred<vscode.TaskExecution>>();
+        this.runningTaskExecution_ = undefined;
     }
 
-    public async ExecuteTask(task: vscode.Task) : Promise<Thenable<vscode.TaskExecution>> {
-        return new Promise<Thenable<vscode.TaskExecution>>((resolve, reject) => {
-            const taskExecution = vscode.tasks.executeTask(task);
-            this._runningExecutionList.push(taskExecution);
-            this._taskStatusEmitter.on(Status.SUCCESS, async () => {
-                if (this._hasResolved) {
-                    reject("Have resolved task");
-                    return;
-                }
-                this._hasResolved = true;
-                resolve(taskExecution);
-                const executionList = await Promise.all(this._runningExecutionList);
-                for (const execution of executionList) {
-                    execution.terminate();
-                }
-                this._isRunning = false;
-            });
-            this._taskStatusEmitter.on(Status.FAIL, () => {
-                reject("Failed task");
-                this._rejectTask += 1;
-                if (this._rejectTask === this._runningExecutionList.length) {
-                    this._isRunning = false;
-                }
-            });
-        });
+    public async ExecuteTask(task: vscode.Task): Promise<vscode.TaskExecution> {
+        const deferredPromise = new Deferred<vscode.TaskExecution>();
+        this.taskDeferredPromiseMap_.set(task.name, deferredPromise);
+        const taskExecution = vscode.tasks.executeTask(task);
+        return deferredPromise.promise.then(async (value: vscode.TaskExecution) => {
+            this.runningTaskExecution_ = await taskExecution;
+            return value;
+        }, undefined);
     }
 
-    public async ExecuteAllTasks(tasks: vscode.Task[]) {
-        if (this._isRunning) {
+    public async ExecuteAllTasks(fullFileName: string, tasks: vscode.Task[]): Promise<boolean> {
+        if (this.isRunning_) {
             vscode.window.showInformationMessage("There is another session running. Please wait until it finishes!");
-            return;
+            return false;
         }
-        this._rejectTask = 0;
-        this._hasResolved = false;
-        this._runningExecutionList = [];
-        this._isRunning = true;
-        const taskExecutionList: Promise<Thenable<vscode.TaskExecution>>[] = [];
+        this.initNewSession();
+        const taskExecutionList: Promise<vscode.TaskExecution>[] = [];
         for (const task of tasks) {
             taskExecutionList.push(this.ExecuteTask(task));
         }
-        await Promise.any(taskExecutionList);
+        try {
+            this.downstreamTaskExecution_ = await Promise.any(taskExecutionList);
+            GlobalCacheMonitor.updateTaskForFile(fullFileName, this.runningTaskExecution_!.task);
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+        this.isRunning_ = false;
+        return true;
     }
 
-    public GetEmitterFromManager() : EventEmitter {
-        return this._taskStatusEmitter;
+    public GetDeferredPromiseByTaskName(taskName: string): Deferred<vscode.TaskExecution> {
+        const deferred = this.taskDeferredPromiseMap_.get(taskName);
+        if (deferred === undefined) {
+            throw new Error("Fatal error! Can not get Deferred object");
+        }
+        return deferred;
+    }
+
+    private initNewSession() {
+        this.taskDeferredPromiseMap_.clear();
+        this.isRunning_ = true;
     }
 }
 

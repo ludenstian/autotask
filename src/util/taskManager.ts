@@ -1,41 +1,77 @@
 import * as vscode from 'vscode';
 import { AutomataskProvider } from './provider';
+import { Deferred } from 'ts-deferred';
 
 class TaskManager {
-    private tasks: vscode.Task[] | undefined = undefined;
+    private watcherList_: vscode.FileSystemWatcher[];
+    private promiseTasks_: Promise<vscode.Task[]> | undefined;
 
-    // TODO: Need to handle by TaskManager itself instead of manually call
-    public async FetchTask() {
-        this.tasks = await vscode.tasks.fetchTasks();
+    constructor() {
+        this.watcherList_ = [];
+        this.promiseTasks_ = undefined;
+        this.initWatcher();
     }
 
-    public GetTaskBy(predicate: (task: vscode.Task) => boolean | undefined) : vscode.Task[] {
-        const result = this.tasks?.filter(predicate === undefined ? TaskManager.GetAllPredicate : predicate);
+    public async initialize() {
+        const deferred = new Deferred<vscode.Task[]>();
+        this.promiseTasks_ = deferred.promise;
+        deferred.resolve(await vscode.tasks.fetchTasks());
+    }
+
+    public async GetTaskBy(predicate: (task: vscode.Task) => boolean | undefined): Promise<vscode.Task[]> {
+        const tasks = await this.promiseTasks_;
+        const result = tasks?.filter(predicate === undefined ? TaskManager.GetAllPredicate : predicate);
         if (result === undefined) {
             return [];
         }
         return result;
     }
 
-    public GetAutomatask() : vscode.Task[] {
-        return this.GetTaskBy(TaskManager.GetAutomataskPredicate);
+    public async GetAllAutomatask(): Promise<vscode.Task[]> {
+        return await this.GetTaskBy(TaskManager.GetAutomataskPredicate);
     }
 
-    public GetAllTaskExceptAutomatask() : vscode.Task[] {
-        return this.GetTaskBy(TaskManager.GetNotAutomataskPredicate);
+    public async GetAllTaskExceptAutomatask(): Promise<vscode.Task[]> {
+        return await this.GetTaskBy(TaskManager.GetNotAutomataskPredicate);
     }
 
-    private static GetNotAutomataskPredicate(task: vscode.Task) : boolean {
+    public dispose() {
+        for (const wc of this.watcherList_) {
+            wc.dispose();
+        }
+    }
+
+    private static GetNotAutomataskPredicate(task: vscode.Task): boolean {
         return !TaskManager.GetAutomataskPredicate(task);
     }
 
-    private static GetAutomataskPredicate(task: vscode.Task) : boolean {
+    private static GetAutomataskPredicate(task: vscode.Task): boolean {
         return task.definition.type === AutomataskProvider.AUTOMATASK_TYPE;
     }
 
-    private static GetAllPredicate(task: vscode.Task) : boolean {
+    private static GetAllPredicate(task: vscode.Task): boolean {
         return true;
+    }
+
+    private async onFileEvent(event: vscode.Uri) {
+        const deferred = new Deferred<vscode.Task[]>();
+        this.promiseTasks_ = deferred.promise;
+        deferred.resolve(await vscode.tasks.fetchTasks());
+    }
+
+    private initWatcher() {
+        const wss = vscode.workspace.workspaceFolders;
+        if (wss === undefined) {
+            return;
+        }
+        for (const ws of wss) {
+            const watcher = vscode.workspace.createFileSystemWatcher(vscode.Uri.joinPath(ws.uri, ".vscode/tasks.json").fsPath);
+            watcher.onDidCreate(this.onFileEvent, this);
+            watcher.onDidChange(this.onFileEvent, this);
+            watcher.onDidDelete(this.onFileEvent, this);
+            this.watcherList_.push(watcher);
+        }
     }
 }
 
-export const taskManager = new TaskManager();
+export const GlobalTaskManager = new TaskManager();
