@@ -1,0 +1,3 @@
+Test basic functionality of extension
+Expected: Extension will show 2 tasks for user to choose "Get content of file", "Get content of file and realpath of file"
+Currently issues: No

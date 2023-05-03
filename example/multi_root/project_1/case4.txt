@@ -1,0 +1,2 @@
+Test how extension reacts when downstream task too long, then we stop and retrigger F6 on that file again
+Expected: Extenstion can stop the running task and retrigger again

@@ -1,0 +1,2 @@
+Test how extension reacts when automatask job is running too long, then we stop it and run again
+Expected: We can trigger stop and rerun successfully
