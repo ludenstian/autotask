@@ -39,6 +39,7 @@ class ExecutionManager {
             GlobalCacheMonitor.updateTaskForFile(fullFileName, this.runningTaskExecution_!.task);
         } catch (error) {
             console.log(error);
+            this.isRunning_ = false;
             return false;
         }
         this.isRunning_ = false;

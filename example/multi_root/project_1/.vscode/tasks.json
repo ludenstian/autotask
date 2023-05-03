@@ -3,126 +3,77 @@
     "tasks": [
         {
             "type": "shell",
-            "label": "Test 1",
-            "command": [
-                "cat", "${file}"
-            ],
+            "command": "cat ${file} && echo",
+            "label": "Get content of file",
             "problemMatcher": []
         },
         {
             "type": "shell",
-            "label": "Test 1 copyy",
-            "command": [
-                "cat", "${file}"
-            ],
-            "problemMatcher": []
-        },
-        {
-            "type": "shell",
-            "label": "Test 2",
-            "command": [
-                "ls", "-a", "${file}"
-            ],
-            "problemMatcher": []
-        },
-        {
-            "type": "shell",
-            "label": "Test 3",
-            "command": [
-                "stat", "${file}"
-            ],
-            "problemMatcher": []
-        },
-        {
-            "type": "shell",
-            "label": "Test 4",
-            "command": [
-                "sleep", "20"
-            ],
-            "problemMatcher": []
-        },
-        {
-            "type": "shell",
-            "label": "Test 5",
-            "command": [
-                "node", "${file}"
-            ],
-            "problemMatcher": []
-        },
-        {
-            "type": "shell",
-            "label": "Test 6",
-            "command": [
-                "file", "${file}"
-            ],
+            "command": "cat ${file} && echo && realpath ${file}",
+            "label": "Get content of file and realpath of file",
             "problemMatcher": []
         },
         {
             "type": "automatask",
             "filePatterns": [
-                "\\.txt"
-            ],
-            "taskToTrigger": ["Test 1"],
-            "label": "Automatically test 1"
-        },
-        {
-            "type": "automatask",
-            "filePatterns": [
-                "\\.xml"
+                "case1_not_existed",
+                "case1\\.txt"
             ],
             "require": [
                 {
-                    "command": "basename ${file}",
-                    "expectedValue": "example",
-                    "name": "Get base name",
+                    "command": "echo $ENV_DUMMY",
+                    "expectedValue": "true",
+                    "name": "Get environment varible",
                     "options": {
                         "cwd": "${fileDirname}",
-                        "shell": {
-                            "executable": "/bin/bash",
-                            "args": []
-                        }
-                    }
-                },
-                {
-                    "command": "echo $ENV_TEST",
-                    "expectedValue": "ludenstian",
-                    "name": "Get env",
-                    "options": {
-                        "cwd": "${fileDirname}",
+                        "env": {
+                            "ENV_DUMMY": "true"
+                        },
                         "shell": {
                             "executable": "/bin/bash"
-                        },
-                        "env": {
-                            "ENV_TEST": "ludenstian"
                         }
                     }
                 }
             ],
-            "taskToTrigger": ["Test 2", "Test 3"],
-            "label": "Automatically test 2 + 3 copy"
+            "taskToTrigger": ["Get content of file", "Get content of file and realpath of file", "Not existed task"],
+            "label": "Case 1"
         },
         {
             "type": "automatask",
             "filePatterns": [
-                "example.js"
+                "case2_not_existed"
+            ],
+            "taskToTrigger": ["Get content of file", "Get content of file and realpath of file", "Not existed task"],
+            "label": "Case 2"
+        },
+        {
+            "type": "automatask",
+            "filePatterns": [
+                "case3\\.txt"
             ],
             "require": [
                 {
-                    "command": "sleep 1000",
-                    "expectedValue": "nothing",
-                    "name": "Sleep forever",
+                    "command": "sleep 10",
+                    "expectedValue": ".*",
+                    "name": "Sleep 10s",
                 }
             ],
-            "taskToTrigger": ["Test 5"],
-            "label": "Automatically test 5"
+            "taskToTrigger": ["Get content of file", "Get content of file and realpath of file", "Not existed task"],
+            "label": "Case 3"
+        },
+        {
+            "type": "shell",
+            "command": "sleep 10",
+            "label": "Sleep 10s",
+            "problemMatcher": []
         },
         {
             "type": "automatask",
             "filePatterns": [
-                "\\.js"
+                "case4\\.txt"
             ],
-            "taskToTrigger": ["Test 6"],
-            "label": "Automatically test 6"
+            "taskToTrigger": ["Sleep 10s"],
+            "label": "Case 4"
         }
     ]
 }

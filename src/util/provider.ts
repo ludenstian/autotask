@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 import * as util from 'node:util';
 import { executionManager } from './executionManager';
 import { GlobalTaskManager } from './taskManager';
+import { Deferred } from 'ts-deferred';
 const exec = util.promisify(cp.exec);
 
 export interface Shell {
@@ -51,6 +52,8 @@ class AutomataskTerminal implements vscode.Pseudoterminal {
     private taskDefinition_: AutomataskDefinition;
     private downstreamTaskExecution_: vscode.TaskExecution | undefined;
     private taskName_: string;
+    private deferred_: Deferred<vscode.TaskExecution> | undefined;
+    private requirementProcessList_: cp.ChildProcess[];
 
     onDidWrite: vscode.Event<string> = this.writeEmitter_.event;
     onDidClose?: vscode.Event<number> = this.closeEmitter_.event;
@@ -58,28 +61,30 @@ class AutomataskTerminal implements vscode.Pseudoterminal {
     constructor(taskName: string, taskDef: AutomataskDefinition) {
         this.taskName_ = taskName;
         this.taskDefinition_ = taskDef;
+        this.deferred_ = undefined;
+        this.requirementProcessList_ = [];
     }
 
     async open(initialDimensions: vscode.TerminalDimensions | undefined): Promise<void> {
-        const deferred = executionManager.GetDeferredPromiseByTaskName(this.taskName_);
+        this.deferred_ = executionManager.GetDeferredPromiseByTaskName(this.taskName_);
         this.writeEmitter_.fire(`Running ${this.taskName_}${Character.ENDLINE}`);
         if (!this.doesMatchFilepatterns()) {
-            deferred.reject();
+            this.deferred_.reject();
             this.closeEmitter_.fire(1);
             return;
         }
 
         if (!(await this.doesTaskMeetRequirements())) {
-            deferred.reject();
+            this.deferred_.reject();
             this.closeEmitter_.fire(1);
             return;
         }
-
+        this.requirementProcessList_ = [];
         const candidateDownstreamTasks = await this.getTasksToTrigger();
 
         if (candidateDownstreamTasks.length === 0) {
             this.writeEmitter_.fire("Cannot find any suitable tasks!" + Character.ENDLINE);
-            deferred.reject();
+            this.deferred_.reject();
             this.closeEmitter_.fire(1);
             return;
         }
@@ -91,11 +96,16 @@ class AutomataskTerminal implements vscode.Pseudoterminal {
             });
         }
         this.downstreamTaskExecution_ = await vscode.tasks.executeTask(candidateDownstreamTasks.at(index)!);
-        deferred.resolve(this.downstreamTaskExecution_);
+        this.deferred_.resolve(this.downstreamTaskExecution_);
         this.closeEmitter_.fire(0);
     }
 
     close(): void {
+        for (const cp of this.requirementProcessList_) {
+            cp.kill();
+        }
+        this.requirementProcessList_ = [];
+        this.deferred_?.reject();
         this.downstreamTaskExecution_?.terminate();
     }
 
@@ -121,12 +131,14 @@ class AutomataskTerminal implements vscode.Pseudoterminal {
 
     private async execRequirement(requirement: Requirement): Promise<boolean> {
         try {
-            const { stdout, stderr } = await exec(requirement.command, {
+            const process = exec(requirement.command, {
                 encoding: "utf-8",
                 cwd: requirement.options?.cwd,
                 shell: requirement.options?.shell?.executable,
                 env: requirement.options?.env
             });
+            this.requirementProcessList_.push(process.child);
+            const { stdout, stderr } = await process;
             const trim_result = stdout.trim();
             const expectedValuePattern = RegExp(requirement.expectedValue);
             if (!expectedValuePattern.test(trim_result)) {

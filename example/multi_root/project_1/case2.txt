@@ -1,0 +1,2 @@
+Test how extension reacts when file doesn't meet requirements of all automatask jobs
+Expected: All tasks are failed
