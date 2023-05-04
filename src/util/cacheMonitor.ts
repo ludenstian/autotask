@@ -33,15 +33,18 @@ class CacheMonitor {
     }
 
     public async dispose() {
-        if (this.db_file_ === undefined) {
-            return;
-        }
+        await this.syncDb();
+    }
+
+    private async syncDb() {
         try {
+            if (this.db_file_ === undefined) {
+                return;
+            }
             await fs.writeFile(this.db_file_.fsPath, JSON.stringify(Object.fromEntries(this.database_)));
         } catch (error) {
             console.log((error as Error).message);
         }
-        console.log("Done");
     }
 
     private async initDatabase() {
@@ -56,46 +59,30 @@ class CacheMonitor {
         }
         catch (error) {
             console.log((error as Error).message);
+            return;
         }
         this.db_file_ = vscode.Uri.joinPath(this.extensionContext_.storageUri, "cache.json");
         console.log(this.db_file_.path);
-        await vscode.workspace.fs.stat(this.db_file_).then(() => { }, async (reason: vscode.FileSystemError) => {
-            // Create file
-            console.log(reason.message);
-            await vscode.workspace.fs.writeFile(this.db_file_!, new Uint8Array([parseInt("{"), parseInt("}")]));
-        });
-        const binaryDatabase = await vscode.workspace.fs.readFile(this.db_file_).then((value: Uint8Array) => { return value; }, (reason: vscode.FileSystemError) => {
-            console.log(reason.message);
-            return undefined;
-        });
-        if (binaryDatabase === undefined) {
-            return;
-        }
-        let jsonDatabase: Object = new Object();
         try {
-            jsonDatabase = JSON.parse(binaryDatabase.toString());
+            const jsonObject = JSON.parse((await fs.readFile(this.db_file_.fsPath)).toString());
+            for (const [key, value] of Object.entries<CacheRecord>(<any>jsonObject)) {
+                const Month = 2592000000; // 30 days in milliseconds
+                const dateInDb = new Date(value.lastAccess);
+                if (Date.now() - dateInDb.getTime() >= Month) { // Reduce database size through time
+                    continue;
+                }
+                this.database_.set(key, value);
+            }
+            await this.integrityCheck();
         } catch (error) {
             console.log((error as Error).message);
         }
-        for (const [key, value] of Object.entries<CacheRecord>(<any>jsonDatabase)) {
-            const Month = 2592000000; // 30 days in milliseconds
-            const dateInDb = new Date(value.lastAccess);
-            if (Date.now() - dateInDb.getTime() >= Month) { // Reduce database size through time
-                continue;
-            }
-            this.database_.set(key, value);
-        }
-        this.integrityCheck();
     }
 
     private async integrityCheck() {
         const tasks = await GlobalTaskManager.GetAllAutomatask();
         for (const task of tasks) {
-            if (task.definition.type !== AutomataskProvider.AUTOMATASK_TYPE) {
-                continue;
-            }
-            const taskName = task.name;
-            const taskDescriptionInDatabase = this.database_.get(taskName)?.taskDiscription;
+            const taskDescriptionInDatabase = this.database_.get(task.name)?.taskDiscription;
             if (taskDescriptionInDatabase === undefined) {
                 continue;
             }
@@ -103,7 +90,7 @@ class CacheMonitor {
             if (taskDescriptionInDatabase === taskDescriptionInJsonTask) {
                 continue;
             }
-            this.database_.delete(taskName);
+            this.database_.delete(task.name);
         }
     }
 
