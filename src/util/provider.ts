@@ -97,7 +97,7 @@ class AutomataskTerminal implements vscode.Pseudoterminal {
                 return task.name === downstreamTaskName;
             });
         }
-        INFO(`Preparing to trigger downstream task '${candidateDownstreamTasks.at(index)!.name}'`)
+        INFO(`Preparing to trigger downstream task '${candidateDownstreamTasks.at(index)!.name}'`);
         this.downstreamTaskExecution_ = await vscode.tasks.executeTask(candidateDownstreamTasks.at(index)!);
         this.deferred_.resolve(this.downstreamTaskExecution_);
         this.closeEmitter_.fire(0);
