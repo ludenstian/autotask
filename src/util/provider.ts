@@ -5,6 +5,7 @@ import * as util from 'node:util';
 import { executionManager } from './executionManager';
 import { GlobalTaskManager } from './taskManager';
 import { Deferred } from 'ts-deferred';
+import { INFO } from './logger';
 const exec = util.promisify(cp.exec);
 
 export interface Shell {
@@ -66,6 +67,7 @@ class AutomataskTerminal implements vscode.Pseudoterminal {
     }
 
     async open(initialDimensions: vscode.TerminalDimensions | undefined): Promise<void> {
+        INFO(`Open terminal for task '${this.taskName_}'`);
         this.deferred_ = executionManager.GetDeferredPromiseByTaskName(this.taskName_);
         this.writeEmitter_.fire(`Running ${this.taskName_}${Character.ENDLINE}`);
         if (!this.doesMatchFilepatterns()) {
@@ -95,12 +97,14 @@ class AutomataskTerminal implements vscode.Pseudoterminal {
                 return task.name === downstreamTaskName;
             });
         }
+        INFO(`Preparing to trigger downstream task '${candidateDownstreamTasks.at(index)!.name}'`);
         this.downstreamTaskExecution_ = await vscode.tasks.executeTask(candidateDownstreamTasks.at(index)!);
         this.deferred_.resolve(this.downstreamTaskExecution_);
         this.closeEmitter_.fire(0);
     }
 
     close(): void {
+        INFO(`Close terminal for task '${this.taskName_}'`);
         for (const cp of this.requirementProcessList_) {
             cp.kill();
         }

@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { GlobalCacheMonitor } from './cacheMonitor';
 import { Deferred } from 'ts-deferred';
+import { ERR, INFO, WARN } from './logger';
 
 class ExecutionManager {
     private isRunning_: boolean;
@@ -26,6 +27,7 @@ class ExecutionManager {
 
     public async ExecuteAllTasks(fullFileName: string, tasks: vscode.Task[]): Promise<boolean> {
         if (this.isRunning_) {
+            WARN("There is another session running!");
             vscode.window.showInformationMessage("There is another session running. Please wait until it finishes!");
             return false;
         }
@@ -35,10 +37,12 @@ class ExecutionManager {
             taskExecutionList.push(this.ExecuteTask(task));
         }
         try {
+            INFO("Wait for tasks to finish");
             this.downstreamTaskExecution_ = await Promise.any(taskExecutionList);
             GlobalCacheMonitor.updateTaskForFile(fullFileName, this.runningTaskExecution_!.task);
+            INFO("Have triggered downstream task");
         } catch (error) {
-            console.log(error);
+            ERR((error as Error).message);
             this.isRunning_ = false;
             return false;
         }
@@ -49,12 +53,14 @@ class ExecutionManager {
     public GetDeferredPromiseByTaskName(taskName: string): Deferred<vscode.TaskExecution> {
         const deferred = this.taskDeferredPromiseMap_.get(taskName);
         if (deferred === undefined) {
+            ERR(`Can not find Deferred<vscode.TaskExecution> object for ${taskName}`);
             throw new Error("Fatal error! Can not get Deferred object");
         }
         return deferred;
     }
 
     private initNewSession() {
+        INFO("Init new session");
         this.taskDeferredPromiseMap_.clear();
         this.isRunning_ = true;
     }

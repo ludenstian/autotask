@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { AutomataskProvider } from './provider';
 import { Deferred } from 'ts-deferred';
+import { INFO } from './logger';
 
 class TaskManager {
     private watcherList_: vscode.FileSystemWatcher[];
@@ -13,6 +14,7 @@ class TaskManager {
     }
 
     public async initialize() {
+        INFO("Init task manager");
         const deferred = new Deferred<vscode.Task[]>();
         this.promiseTasks_ = deferred.promise;
         deferred.resolve(await vscode.tasks.fetchTasks());
@@ -54,6 +56,7 @@ class TaskManager {
     }
 
     private async onFileEvent(event: vscode.Uri) {
+        INFO(`Handle event on ${event.fsPath}`);
         const deferred = new Deferred<vscode.Task[]>();
         this.promiseTasks_ = deferred.promise;
         deferred.resolve(await vscode.tasks.fetchTasks());
@@ -65,7 +68,9 @@ class TaskManager {
             return;
         }
         for (const ws of wss) {
-            const watcher = vscode.workspace.createFileSystemWatcher(vscode.Uri.joinPath(ws.uri, ".vscode/tasks.json").fsPath);
+            const path = vscode.Uri.joinPath(ws.uri, ".vscode/tasks.json").fsPath;
+            INFO(`Init watcher for ${path}`);
+            const watcher = vscode.workspace.createFileSystemWatcher(path);
             watcher.onDidCreate(this.onFileEvent, this);
             watcher.onDidChange(this.onFileEvent, this);
             watcher.onDidDelete(this.onFileEvent, this);
