@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { GlobalCacheMonitor } from './cacheMonitor';
 import { executionManager } from './executionManager';
 import { GlobalTaskManager } from './taskManager';
+import { INFO } from './logger';
 
 export class AutomataskCommand {
     public static AUTOMATASK_COMMAND = "automatask.run";
@@ -16,6 +17,7 @@ export class AutomataskCommand {
         const automaTasks = await GlobalTaskManager.GetAllAutomatask();
         const taskName: string | undefined = GlobalCacheMonitor.getCacheTaskForFile(fullFileName);
         if (taskName === undefined) { // Not in cache database
+            INFO(`${fullFileName} does not exist in database. Run all tasks!`);
             await executionManager.ExecuteAllTasks(fullFileName, automaTasks);
             return;
         }
@@ -27,11 +29,14 @@ export class AutomataskCommand {
             }
         }
         if (cachedTaskToRun === undefined) {
+            INFO(`'${taskName}' task does not exist in tasks.json. Run all tasks!`);
             await executionManager.ExecuteAllTasks(fullFileName, automaTasks);
             return;
         }
+        INFO(`Run task '${taskName}'`);
         const result = await executionManager.ExecuteAllTasks(fullFileName, [cachedTaskToRun]);
         if (result === false) {
+            INFO(`Failed to run '${taskName}'. Run all tasks!`);
             await executionManager.ExecuteAllTasks(fullFileName, automaTasks);
         }
     }

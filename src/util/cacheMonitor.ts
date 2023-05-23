@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'node:fs/promises';
 import { AutomataskDefinition, AutomataskProvider } from './provider';
 import { GlobalTaskManager } from './taskManager';
+import { ERR, INFO } from './logger';
 
 interface CacheRecord {
     taskName: string,
@@ -20,6 +21,7 @@ class CacheMonitor {
     }
 
     public async initialize(context: vscode.ExtensionContext) {
+        INFO("Init cache monitor");
         this.setExtentionContext(context);
         await this.initDatabase();
     }
@@ -41,9 +43,10 @@ class CacheMonitor {
             if (this.db_file_ === undefined) {
                 return;
             }
+            INFO("Write to database file");
             await fs.writeFile(this.db_file_.fsPath, JSON.stringify(Object.fromEntries(this.database_)));
         } catch (error) {
-            console.log((error as Error).message);
+            ERR((error as Error).message);
         }
     }
 
@@ -58,24 +61,25 @@ class CacheMonitor {
             await vscode.workspace.fs.createDirectory(this.extensionContext_.storageUri);
         }
         catch (error) {
-            console.log((error as Error).message);
+            ERR((error as Error).message);
             return;
         }
         this.db_file_ = vscode.Uri.joinPath(this.extensionContext_.storageUri, "cache.json");
-        console.log(this.db_file_.path);
+        INFO(`Database file ${this.db_file_.path}`);
         try {
             const jsonObject = JSON.parse((await fs.readFile(this.db_file_.fsPath)).toString());
             for (const [key, value] of Object.entries<CacheRecord>(<any>jsonObject)) {
                 const Month = 2592000000; // 30 days in milliseconds
                 const dateInDb = new Date(value.lastAccess);
                 if (Date.now() - dateInDb.getTime() >= Month) { // Reduce database size through time
+                    INFO(`Remove outdated ${key} entry out of db`);
                     continue;
                 }
                 this.database_.set(key, value);
             }
             await this.integrityCheck();
         } catch (error) {
-            console.log((error as Error).message);
+            ERR((error as Error).message);
         }
     }
 
@@ -90,6 +94,7 @@ class CacheMonitor {
             if (taskDescriptionInDatabase === taskDescriptionInJsonTask) {
                 continue;
             }
+            INFO(`Remove noexisted task '${task.name}' out of db`);
             this.database_.delete(task.name);
         }
     }
