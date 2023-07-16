@@ -21,7 +21,6 @@
     "script"
   ],
   "activationEvents": [
-    "onCommand:workbench.action.tasks.runTask",
     "onCommand:automatask.run"
   ],
   "author": {
