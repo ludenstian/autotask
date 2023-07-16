@@ -97,4 +97,6 @@ Now you can trigger specific `Install package` task by `Ctrl + Shift + P -> Task
 Contributions are always welcome.
 
 ## Acknowledgments
+[Hermes icons created by max.icons - Flaticon](https://www.flaticon.com/free-icons/hermes)
+
 Thanks all for endless support for this extension in terms of developing and using it.
