@@ -22,14 +22,14 @@ export interface Requirement {
     name: string;
     options?: CommandOptions | undefined;
 }
-export interface AutomataskDefinition extends vscode.TaskDefinition {
+export interface AutotaskDefinition extends vscode.TaskDefinition {
     filePatterns: Array<string>;
     taskToTrigger: Array<string>;
     require?: Array<Requirement>;
 }
 
-export class AutomataskProvider implements vscode.TaskProvider {
-    public static AUTOMATASK_TYPE = "automatask";
+export class AutotaskProvider implements vscode.TaskProvider {
+    public static AUTOTASK_TYPE = "autotask";
 
     public provideTasks(token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task[]> {
         return [];
@@ -37,8 +37,8 @@ export class AutomataskProvider implements vscode.TaskProvider {
 
     public resolveTask(task: vscode.Task, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task> {
         return new vscode.Task(task.definition, vscode.TaskScope.Workspace,
-            task.name, AutomataskProvider.AUTOMATASK_TYPE, new vscode.CustomExecution(async (resolvedDefinition: vscode.TaskDefinition): Promise<vscode.Pseudoterminal> => {
-                return new AutomataskTerminal(task.name, <any>resolvedDefinition);
+            task.name, AutotaskProvider.AUTOTASK_TYPE, new vscode.CustomExecution(async (resolvedDefinition: vscode.TaskDefinition): Promise<vscode.Pseudoterminal> => {
+                return new AutotaskTerminal(task.name, <any>resolvedDefinition);
             }), "");
     }
 }
@@ -47,10 +47,10 @@ enum Character {
     ENDLINE = "\r\n"
 };
 
-class AutomataskTerminal implements vscode.Pseudoterminal {
+class AutotaskTerminal implements vscode.Pseudoterminal {
     private writeEmitter_ = new vscode.EventEmitter<string>();
     private closeEmitter_ = new vscode.EventEmitter<number>();
-    private taskDefinition_: AutomataskDefinition;
+    private taskDefinition_: AutotaskDefinition;
     private downstreamTaskExecution_: vscode.TaskExecution | undefined;
     private taskName_: string;
     private deferred_: Deferred<vscode.TaskExecution> | undefined;
@@ -59,7 +59,7 @@ class AutomataskTerminal implements vscode.Pseudoterminal {
     onDidWrite: vscode.Event<string> = this.writeEmitter_.event;
     onDidClose?: vscode.Event<number> = this.closeEmitter_.event;
 
-    constructor(taskName: string, taskDef: AutomataskDefinition) {
+    constructor(taskName: string, taskDef: AutotaskDefinition) {
         this.taskName_ = taskName;
         this.taskDefinition_ = taskDef;
         this.deferred_ = undefined;
@@ -173,10 +173,10 @@ class AutomataskTerminal implements vscode.Pseudoterminal {
     }
 
     private async getTasksToTrigger(): Promise<vscode.Task[]> {
-        const tasks = await GlobalTaskManager.GetAllTaskExceptAutomatask();
+        const tasks = await GlobalTaskManager.GetAllTaskExceptAutotask();
         const result: vscode.Task[] = [];
         for (const task of tasks) {
-            if (task.definition.type === AutomataskProvider.AUTOMATASK_TYPE) {
+            if (task.definition.type === AutotaskProvider.AUTOTASK_TYPE) {
                 continue;
             }
             if (this.taskDefinition_.taskToTrigger.indexOf(task.name) === -1) {

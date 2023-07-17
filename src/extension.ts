@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { AutomataskCommand } from './util/command';
-import { AutomataskProvider } from './util/provider';
+import { AutotaskCommand } from './util/command';
+import { AutotaskProvider } from './util/provider';
 import { GlobalCacheMonitor } from './util/cacheMonitor';
 import { GlobalTaskManager } from './util/taskManager';
 import { INFO, disposeLogger } from './util/logger';
@@ -10,11 +10,11 @@ let commandDisposable: vscode.Disposable | undefined;
 
 export async function activate(context: vscode.ExtensionContext) {
     INFO("Activate extension");
-    const command = new AutomataskCommand();
+    const command = new AutotaskCommand();
     let initialize = false;
-    providerDisposable = vscode.tasks.registerTaskProvider(AutomataskProvider.AUTOMATASK_TYPE,
-        new AutomataskProvider());
-    commandDisposable = vscode.commands.registerCommand(AutomataskCommand.AUTOMATASK_COMMAND, async () => {
+    providerDisposable = vscode.tasks.registerTaskProvider(AutotaskProvider.AUTOTASK_TYPE,
+        new AutotaskProvider());
+    commandDisposable = vscode.commands.registerCommand(AutotaskCommand.AUTOTASK_COMMAND, async () => {
         if (initialize === false) {
             INFO("Init global variables");
             await GlobalTaskManager.initialize();

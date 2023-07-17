@@ -10,7 +10,7 @@ class Logger {
     private _implLogger : vscode.OutputChannel;
 
     constructor() {
-        this._implLogger = vscode.window.createOutputChannel("Automatask");
+        this._implLogger = vscode.window.createOutputChannel("Autotask");
     }
 
     private composeMessage(level: LogLevel, message: string) {

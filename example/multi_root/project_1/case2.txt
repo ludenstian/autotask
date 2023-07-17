@@ -1,2 +1,2 @@
-Test how extension reacts when file doesn't meet requirements of all automatask jobs
+Test how extension reacts when file doesn't meet requirements of all autotask jobs
 Expected: All tasks are failed

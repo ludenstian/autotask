@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { AutomataskProvider } from './provider';
+import { AutotaskProvider } from './provider';
 import { Deferred } from 'ts-deferred';
 import { INFO } from './logger';
 
@@ -29,12 +29,12 @@ class TaskManager {
         return result;
     }
 
-    public async GetAllAutomatask(): Promise<vscode.Task[]> {
-        return await this.GetTaskBy(TaskManager.GetAutomataskPredicate);
+    public async GetAllAutotask(): Promise<vscode.Task[]> {
+        return await this.GetTaskBy(TaskManager.GetAutotaskPredicate);
     }
 
-    public async GetAllTaskExceptAutomatask(): Promise<vscode.Task[]> {
-        return await this.GetTaskBy(TaskManager.GetNotAutomataskPredicate);
+    public async GetAllTaskExceptAutotask(): Promise<vscode.Task[]> {
+        return await this.GetTaskBy(TaskManager.GetNotAutotaskPredicate);
     }
 
     public dispose() {
@@ -43,12 +43,12 @@ class TaskManager {
         }
     }
 
-    private static GetNotAutomataskPredicate(task: vscode.Task): boolean {
-        return !TaskManager.GetAutomataskPredicate(task);
+    private static GetNotAutotaskPredicate(task: vscode.Task): boolean {
+        return !TaskManager.GetAutotaskPredicate(task);
     }
 
-    private static GetAutomataskPredicate(task: vscode.Task): boolean {
-        return task.definition.type === AutomataskProvider.AUTOMATASK_TYPE;
+    private static GetAutotaskPredicate(task: vscode.Task): boolean {
+        return task.definition.type === AutotaskProvider.AUTOTASK_TYPE;
     }
 
     private static GetAllPredicate(task: vscode.Task): boolean {
