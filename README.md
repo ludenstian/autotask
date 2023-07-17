@@ -1,4 +1,4 @@
-# Automatask
+# Autotask
 
 ## Overview
 This extension will automatically run appropriate tasks based on filetype, filename or user's requirements in Visual Studio Code.
