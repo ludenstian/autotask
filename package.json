@@ -4,9 +4,9 @@
   "description": "Automatically run appropriate tasks based one filetype, filename or user's requirements in Visual Studio Code",
   "icon": "public/logo.png",
   "publisher": "ludenstian",
-  "version": "4.1.4",
+  "version": "5.0.0",
   "repository": {
-    "url": "https://github.com/nhathuy13598/autotask"
+    "url": "https://github.com/ludenstian/autotask"
   },
   "engines": {
     "vscode": "^1.67.2"
