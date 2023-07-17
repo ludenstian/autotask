@@ -1,13 +1,13 @@
 import * as vscode from 'vscode';
 import * as fs from 'node:fs/promises';
-import { AutomataskDefinition, AutomataskProvider } from './provider';
+import { AutotaskDefinition, AutotaskProvider } from './provider';
 import { GlobalTaskManager } from './taskManager';
 import { ERR, INFO } from './logger';
 
 interface CacheRecord {
     taskName: string,
     lastAccess: Date,
-    taskDiscription: AutomataskDefinition
+    taskDiscription: AutotaskDefinition
 };
 
 class CacheMonitor {
@@ -84,13 +84,13 @@ class CacheMonitor {
     }
 
     private async integrityCheck() {
-        const tasks = await GlobalTaskManager.GetAllAutomatask();
+        const tasks = await GlobalTaskManager.GetAllAutotask();
         for (const task of tasks) {
             const taskDescriptionInDatabase = this.database_.get(task.name)?.taskDiscription;
             if (taskDescriptionInDatabase === undefined) {
                 continue;
             }
-            const taskDescriptionInJsonTask: AutomataskDefinition = <any>task.definition;
+            const taskDescriptionInJsonTask: AutotaskDefinition = <any>task.definition;
             if (taskDescriptionInDatabase === taskDescriptionInJsonTask) {
                 continue;
             }

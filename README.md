@@ -41,10 +41,10 @@ You have to choose the right task everytime you want to run without recommendati
 <img src="./public/Before.gif" width="75%" height="75%"/>
 
 ### After using this extension
-Now, you can create a task called `automatask` to automatically choose the appropriate task to run based on filetype, filename or user's requirements by pressing `F6` only while opening `.js` file. It will show a selection list if there are more than one task that you can run.
+Now, you can create a task called `autotask` to automatically choose the appropriate task to run based on filetype, filename or user's requirements by pressing `F6` only while opening `.js` file. It will show a selection list if there are more than one task that you can run.
 ```
 {
-    "type": "automatask",
+    "type": "autotask",
     "filePatterns": ["\\.js"],
     "taskToTrigger": ["Install prod package", "Install dev package"],
     "label": "Install package"
@@ -54,7 +54,7 @@ Now, you can create a task called `automatask` to automatically choose the appro
 <img src="./public/After.gif" width="75%" height="75%"/>
 
 ## How to use
-You need to add a new task called `automatask` alongside with already existed tasks. This `automatask` task is where you define conditions to run the desired ones. This is the example `tasks.json`: 
+You need to add a new task called `autotask` alongside with already existed tasks. This `autotask` task is where you define conditions to run the desired ones. This is the example `tasks.json`: 
 ```
 {
     "version": "2.0.0",
@@ -76,7 +76,7 @@ You need to add a new task called `automatask` alongside with already existed ta
             "problemMatcher": []
         },
         {
-            "type": "automatask",
+            "type": "autotask",
             "filePatterns": ["\\.js"],
             "taskToTrigger": ["Install prod package", "Install dev package"],
             "label": "Install package"

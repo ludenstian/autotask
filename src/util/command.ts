@@ -4,8 +4,8 @@ import { executionManager } from './executionManager';
 import { GlobalTaskManager } from './taskManager';
 import { INFO } from './logger';
 
-export class AutomataskCommand {
-    public static AUTOMATASK_COMMAND = "automatask.run";
+export class AutotaskCommand {
+    public static AUTOTASK_COMMAND = "autotask.run";
 
     public async run() {
         const activeTextEditor = vscode.window.activeTextEditor;
@@ -14,7 +14,7 @@ export class AutomataskCommand {
             return;
         }
         const fullFileName = activeTextEditor.document.fileName;
-        const automaTasks = await GlobalTaskManager.GetAllAutomatask();
+        const automaTasks = await GlobalTaskManager.GetAllAutotask();
         const taskName: string | undefined = GlobalCacheMonitor.getCacheTaskForFile(fullFileName);
         if (taskName === undefined) { // Not in cache database
             INFO(`${fullFileName} does not exist in database. Run all tasks!`);

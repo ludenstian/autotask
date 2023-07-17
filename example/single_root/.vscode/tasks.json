@@ -14,7 +14,7 @@
             "problemMatcher": []
         },
         {
-            "type": "automatask",
+            "type": "autotask",
             "filePatterns": [
                 "case1_not_existed",
                 "case1\\.txt"
@@ -39,7 +39,7 @@
             "label": "Case 1"
         },
         {
-            "type": "automatask",
+            "type": "autotask",
             "filePatterns": [
                 "case2_not_existed"
             ],
@@ -47,7 +47,7 @@
             "label": "Case 2"
         },
         {
-            "type": "automatask",
+            "type": "autotask",
             "filePatterns": [
                 "case3\\.txt"
             ],
@@ -68,7 +68,7 @@
             "problemMatcher": []
         },
         {
-            "type": "automatask",
+            "type": "autotask",
             "filePatterns": [
                 "case4\\.txt"
             ],

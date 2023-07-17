@@ -1,12 +1,12 @@
 {
-  "name": "automatask",
-  "displayName": "Automatask",
+  "name": "autotask",
+  "displayName": "Autotask",
   "description": "Automatically run appropriate tasks based one filetype, filename or user's requirements in Visual Studio Code",
   "icon": "public/logo.png",
   "publisher": "ludenstian",
   "version": "4.1.3",
   "repository": {
-    "url": "https://github.com/nhathuy13598/automatask"
+    "url": "https://github.com/nhathuy13598/autotask"
   },
   "engines": {
     "vscode": "^1.67.2"
@@ -15,13 +15,14 @@
     "Other"
   ],
   "keywords": [
-    "tasks",
+    "task",
     "automatic",
     "execute",
-    "script"
+    "script",
+    "autotask"
   ],
   "activationEvents": [
-    "onCommand:automatask.run"
+    "onCommand:autotask.run"
   ],
   "author": {
     "name": "nhathuy"
@@ -30,13 +31,13 @@
   "contributes": {
     "commands": [
       {
-        "command": "automatask.run",
+        "command": "autotask.run",
         "title": "Automatically run tasks"
       }
     ],
     "taskDefinitions": [
       {
-        "type": "automatask",
+        "type": "autotask",
         "required": [
           "taskToTrigger",
           "label",
@@ -121,7 +122,7 @@
     ],
     "keybindings": [
       {
-        "command": "automatask.run",
+        "command": "autotask.run",
         "key": "F6",
         "linux": "F6",
         "mac": "F6",

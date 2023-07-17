@@ -1,4 +1,4 @@
-Test how extension reacts when automatask job is running too long, then we stop it and run again
+Test how extension reacts when autotask job is running too long, then we stop it and run again
 Expected: We can trigger stop and rerun successfully
 Currently issues:
-- With cache db, when we stop it will automatically rerun all automatask jobs
+- With cache db, when we stop it will automatically rerun all autotask jobs
